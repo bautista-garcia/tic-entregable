@@ -4,6 +4,7 @@ from decodificacion import corregir, detectar
 from csb import canalCSB
 import numpy as np
 from scipy.special import erfcinv
+import os
 
 
 # e_p: Error de palabra
@@ -39,7 +40,7 @@ def Simulacion(EbN0_c, n, k, dmin, MODO, A = 1):
         EbfN0 = 10**(EbN0/10)                 # Eb/N0 [veces]
         P_eb_t = Q(np.sqrt(2 * EbfN0))        # Tasa de error de bit teorica (estimada)
         PALABRAS = int((10**2) * (1/P_eb_t)) 
-        PALABRAS = PALABRAS if (PALABRAS > 1000000) else 1000000
+        PALABRAS = PALABRAS if (PALABRAS > 100000) else 100000
         
         # Arrays para almacenar resultados de cada iteración
         P_ep_iter = np.zeros(ITERACIONES)
@@ -66,6 +67,14 @@ def Simulacion(EbN0_c, n, k, dmin, MODO, A = 1):
         # Promedio de iteraciones
         P_ep[i] = np.mean(P_ep_iter)
         P_eb[i] = np.mean(P_eb_iter)
+
+        # Si no se observaron errores, establecer una cota superior para evitar ceros en la gráfica logarítmica
+        total_palabras_simuladas = PALABRAS * ITERACIONES
+        total_bits_simulados = k * total_palabras_simuladas
+        if P_ep[i] == 0:
+            P_ep[i] = 1 / total_palabras_simuladas
+        if P_eb[i] == 0:
+            P_eb[i] = 1 / total_bits_simulados
         
         print(f"Promedio final - Eb/N0: {EbN0:.2f} dB, Tasa de error de bit: {P_eb[i]:.6f}")
     return P_ep, P_eb
@@ -80,11 +89,16 @@ def main():
     EbN0_sc = 10 * np.log10((Qinv(P_eb) ** 2) * 0.5)
     Gc = EbN0_sc - EbN0_c
 
+    # Crear directorios si no existen
+    resultados_dir = os.path.join(os.path.dirname(__file__), 'resultados')
+    os.makedirs(resultados_dir, exist_ok=True)
+
     # Analizar resultados
     print(f"n: {n}, k: {k}, tc: {tc}, dmin: {dmin}, Ga: {Ga:.2f} dB")
     graficos(EbN0_c, P_eb, Gc, Ga, "DETECTOR" if MODO == 0 else "CORRECTOR") # Graficos: curva de error y ganancia de codigo (Eb/N0)
     df = simulation_table(EbN0_c, P_ep, P_eb, Gc, Ga) # Tabla de resultados
-    df.to_csv(f'comunicacion_digital/resultados/{"detector" if MODO == 0 else "corrector"}.csv', index=False)
+    output_file = os.path.join(resultados_dir, f'{"detector" if MODO == 0 else "corrector"}.csv')
+    df.to_csv(output_file, index=False)
 
 if __name__ == "__main__":
     main()

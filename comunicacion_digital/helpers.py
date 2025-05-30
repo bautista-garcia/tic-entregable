@@ -1,17 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.special import erfc, erfcinv
+from scipy.special import erfc, erfcinv, comb
 import pandas as pd
+import os
 
 def Q(x):
     """
-    Q-function for array or scalar input.
+    Función Q para entrada escalar o vectorial.
     """
     return 0.5 * erfc(x / np.sqrt(2))
 
 def Qinv(p):
     """
-    Q-inverse function for array or scalar input.
+    Función Q^-1 para entrada escalar o vectorial.
     """
     p = np.asarray(p)
     return np.sqrt(2) * erfcinv(2 * p)
@@ -23,19 +24,25 @@ def random_U(n: int, k:int):
     return np.random.randint(0, 2, (n, k))
 
 
-def graficos(Ebn_c, P_eb, Gc, Ga, MODO):
+def graficos(Ebn_c, P_eb, Gc, Ga, MODO, n, tc, td):
     """
     Primer subplot: Curvas de tasa de error de bit y teórica.
     Segundo subplot: Ganancia asintótica (constante) y ganancia real (curva).
     Todos los argumentos deben ser np.arrays.
     """
-    Ebn_c = np.asarray(Ebn_c)
-    P_eb = np.asarray(P_eb)
-    Gc = np.asarray(Gc)
+    Ebn_c = np.asarray(Ebn_c) # Ebn [dB]
+    P_eb = np.asarray(P_eb) # Tasa de error de bit
+    Gc = np.asarray(Gc) # Ganancia del codigo
+    Ebn_c_veces = 10**(Ebn_c/10) # Ebn [veces]
+    Q_teorica = Q(np.sqrt(2 * Ebn_c_veces)) # Q teorica
+    if (MODO == "DETECTOR"):
+        P_eb_teorica = ((2 * td + 1)/n) * (comb(n, td + 1)) * (Q_teorica ** (td + 1))
+    else:
+        P_eb_teorica = ((2 * tc + 1)/n) * (comb(n, tc + 1)) * (Q_teorica ** (tc + 1))
     fig, axs = plt.subplots(1, 2, figsize=(14, 6))
-    axs[0].semilogy(Ebn_c, P_eb, 'o-', label=f'BER - MODO: {MODO}')
-    Q_teorica = 0.5 * erfc(np.sqrt(10**(Ebn_c/10)))
-    axs[0].semilogy(Ebn_c, Q_teorica, '--', label=r'$Q(\sqrt{2 E_b/N_0})$ (teórica)')
+    axs[0].semilogy(Ebn_c, P_eb, 'o-', label=r'$P_{eb}$ (codificada - simulacion)')
+    axs[0].semilogy(Ebn_c, P_eb_teorica, '--', label=r'$P_{eb}$ (codificada - teórica)')
+    axs[0].semilogy(Ebn_c, Q_teorica, '--', label=r'$Q(\sqrt{2 E_b/N_0})$ (sin codificar - teórica)')
     axs[0].set_xticks(np.arange(np.min(Ebn_c), np.max(Ebn_c) + 1, 1))
     axs[0].grid(True, which="both", ls="-", alpha=0.2)
     axs[0].set_yscale('log')
@@ -52,7 +59,9 @@ def graficos(Ebn_c, P_eb, Gc, Ga, MODO):
     axs[1].legend()
     axs[1].grid(True, ls='--', alpha=0.5)
     plt.tight_layout()
-    plt.savefig(f'comunicacion_digital/graficos/{MODO}.png')
+    graficos_dir = os.path.join(os.path.dirname(__file__), 'graficos')
+    os.makedirs(graficos_dir, exist_ok=True)
+    plt.savefig(os.path.join(graficos_dir, f'{MODO}.png'))
     plt.show()
 
 def simulation_table(Ebn_c, P_ep, P_eb, Gc, Ga):

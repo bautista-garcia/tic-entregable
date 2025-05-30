@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 def estadisticas_compresion(resultados):
     """
@@ -8,6 +9,10 @@ def estadisticas_compresion(resultados):
     Args:
         resultados: Lista de diccionarios con las estadísticas de compresión
     """
+    # Crear directorio de gráficos si no existe
+    graficos_dir = os.path.join(os.path.dirname(__file__), 'graficos')
+    os.makedirs(graficos_dir, exist_ok=True)
+
     # Extraer datos
     n_values = [r['n'] for r in resultados]
     longitudes = [r['longitud_promedio'] for r in resultados]
@@ -19,7 +24,7 @@ def estadisticas_compresion(resultados):
     # Gráfico 1: Longitud promedio/n vs n
     ax1.plot(n_values, np.array(longitudes)/n_values, 'bo-', label='Longitud promedio/n')
     ax1.set_xlabel('n (tamaño del bloque)')
-    ax1.set_ylabel('Longitud promedio/n (bits/simbolo)')
+    ax1.set_ylabel('Longitud promedio/n (bits/símbolo)')
     ax1.set_title('Longitud promedio normalizada vs tamaño del bloque')
     ax1.grid(True)
     ax1.legend()
@@ -27,14 +32,15 @@ def estadisticas_compresion(resultados):
     # Gráfico 2: Tasa de compresión vs n
     ax2.plot(n_values, tasas, 'ro-', label='Tasa de compresión')
     ax2.set_xlabel('n (tamaño del bloque)')
-    ax2.set_ylabel('Tasa de compresión (bits/simbolo)')
+    ax2.set_ylabel('Tasa de compresión (bits/símbolo)')
     ax2.set_title('Tasa de compresión vs tamaño del bloque')
     ax2.grid(True)
     ax2.legend()
     
     # Ajustar layout y guardar antes de mostrar
     plt.tight_layout()
-    plt.savefig('Longitudes_Tasas.png', dpi=300, bbox_inches='tight')
+    output_file = os.path.join(graficos_dir, 'Longitudes_Tasas.png')
+    plt.savefig(output_file, dpi=300, bbox_inches='tight')
     plt.show()
 
 
@@ -46,6 +52,10 @@ def distribuciones_probabilidad(codigos_info, n):
         codigos_info: Lista de diccionarios con información de los símbolos
         n: Tamaño del bloque
     """
+    # Crear directorio de gráficos si no existe
+    graficos_dir = os.path.join(os.path.dirname(__file__), 'graficos')
+    os.makedirs(graficos_dir, exist_ok=True)
+
     # Extraer símbolos y probabilidades
     simbolos = [codigo['simbolo'] for codigo in codigos_info]
     probabilidades = [codigo['probabilidad'] for codigo in codigos_info]
@@ -71,7 +81,8 @@ def distribuciones_probabilidad(codigos_info, n):
     
     # Ajustar layout y guardar antes de mostrar
     plt.tight_layout()
-    plt.savefig(f'distribucion_probabilidades_n{n}.png', dpi=300, bbox_inches='tight')
+    output_file = os.path.join(graficos_dir, f'distribucion_probabilidades_n{n}.png')
+    plt.savefig(output_file, dpi=300, bbox_inches='tight')
     plt.show()
     
     
