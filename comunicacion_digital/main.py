@@ -1,4 +1,4 @@
-from helpers import random_U, graficos, simulation_table, Qinv, Q
+from helpers import random_U, graficos_corrector, graficos_detector, simulation_table, Qinv, Q
 from codificacion import matrizGeneradora, mejorCodigo 
 from decodificacion import corregir, detectar
 from csb import canalCSB
@@ -33,14 +33,14 @@ def Simulacion(EbN0_c, n, k, dmin, MODO, A = 1):
     """
     P_ep = np.zeros_like(EbN0_c, dtype=float)
     P_eb = np.zeros_like(EbN0_c, dtype=float)
-    ITERACIONES = 10
+    ITERACIONES = 5
     
     for i, EbN0 in enumerate(EbN0_c):
         H_t, G = matrizGeneradora(n, k, dmin) # Generar matrices de codigo 
         EbfN0 = 10**(EbN0/10)                 # Eb/N0 [veces]
         P_eb_t = Q(np.sqrt(2 * EbfN0))        # Tasa de error de bit teorica (estimada)
         PALABRAS = int((10**2) * (1/P_eb_t)) 
-        PALABRAS = PALABRAS if (PALABRAS > 100000) else 100000
+        PALABRAS = PALABRAS if (PALABRAS > 1000000) else 1000000
         
         # Arrays para almacenar resultados de cada iteración
         P_ep_iter = np.zeros(ITERACIONES)
@@ -80,7 +80,7 @@ def Simulacion(EbN0_c, n, k, dmin, MODO, A = 1):
     return P_ep, P_eb
 
 def main():
-    MODO = 1 # 0 = DETECTOR; 1 = CORRECTOR
+    MODO = 0 # 0 = DETECTOR; 1 = CORRECTOR
     n, k = 14, 10 # Parametros del codigo
     tc, dmin = mejorCodigo(n, k) # Parametros del codigo: Mejor (14,10)
     EbN0_c = np.linspace(1, 10, 30) # Rango de energia/ruido [dB]
@@ -95,8 +95,14 @@ def main():
 
     # Analizar resultados
     print(f"n: {n}, k: {k}, tc: {tc}, dmin: {dmin}, Ga: {Ga:.2f} dB")
-    graficos(EbN0_c, P_eb, Gc, Ga, "DETECTOR" if MODO == 0 else "CORRECTOR") # Graficos: curva de error y ganancia de codigo (Eb/N0)
-    df = simulation_table(EbN0_c, P_ep, P_eb, Gc, Ga) # Tabla de resultados
+    
+    if MODO == 0:  # DETECTOR
+        graficos_detector(EbN0_c, P_ep, n, k, tc, dmin - 1)
+    else:  # CORRECTOR
+        graficos_corrector(EbN0_c, P_eb, Gc, Ga, n, k, td=dmin - 1)
+    
+    # Guardar resultados
+    df = simulation_table(EbN0_c, P_ep, P_eb, Gc, Ga)
     output_file = os.path.join(resultados_dir, f'{"detector" if MODO == 0 else "corrector"}.csv')
     df.to_csv(output_file, index=False)
 

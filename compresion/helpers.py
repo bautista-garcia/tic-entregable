@@ -25,15 +25,15 @@ def estadisticas_compresion(resultados):
     ax1.plot(n_values, np.array(longitudes)/n_values, 'bo-', label='Longitud promedio/n')
     ax1.set_xlabel('n (tamaño del bloque)')
     ax1.set_ylabel('Longitud promedio/n (bits/símbolo)')
-    ax1.set_title('Longitud promedio normalizada vs tamaño del bloque')
+    ax1.set_title('Longitud promedio normalizada vs extension de fuente')
     ax1.grid(True)
     ax1.legend()
     
     # Gráfico 2: Tasa de compresión vs n
     ax2.plot(n_values, tasas, 'ro-', label='Tasa de compresión')
     ax2.set_xlabel('n (tamaño del bloque)')
-    ax2.set_ylabel('Tasa de compresión (bits/símbolo)')
-    ax2.set_title('Tasa de compresión vs tamaño del bloque')
+    ax2.set_ylabel('Tasa de compresión')
+    ax2.set_title('Tasa de compresión vs extension de fuente')
     ax2.grid(True)
     ax2.legend()
     

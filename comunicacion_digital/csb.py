@@ -8,7 +8,7 @@ def canalCSB(n, k, A, EbfN0, V):
         n: Largo de palabra de código
         k: Largo de palabra de fuente
         A: Amplitud de la señal BPSK
-        EbfN0: Cociente Eb/N0 deseado (en veces, no dB)
+        EbfN0: Cociente Eb/N0 deseado (en veces)
         V: Matriz de palabras código (cada fila es una palabra código)
     
     Returns:

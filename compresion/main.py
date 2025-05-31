@@ -42,7 +42,7 @@ def calcular_estadisticas_compresion(n, ruta_imagen):
     
     # Cálculo de estadísticas
     LONGITUD_PROMEDIO_C = sum((codigo['probabilidad']) * len(codigo['codigo']) for codigo in codigos_info)
-    TASA_COMPRESION = LONGITUD_PROMEDIO_SC / (LONGITUD_PROMEDIO_C/n)  # n símbolos por bloque  
+    TASA_COMPRESION = 1/(LONGITUD_PROMEDIO_C / n)  # n símbolos por bloque  
 
     return {
         'n': n,
