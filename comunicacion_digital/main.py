@@ -33,13 +33,13 @@ def Simulacion(EbN0_c, n, k, dmin, MODO, A = 1):
     """
     P_ep = np.zeros_like(EbN0_c, dtype=float)
     P_eb = np.zeros_like(EbN0_c, dtype=float)
-    ITERACIONES = 5
+    ITERACIONES = 10
     
     for i, EbN0 in enumerate(EbN0_c):
         H_t, G = matrizGeneradora(n, k, dmin) # Generar matrices de codigo 
         EbfN0 = 10**(EbN0/10)                 # Eb/N0 [veces]
         P_eb_t = Q(np.sqrt(2 * EbfN0))        # Tasa de error de bit teorica (estimada)
-        PALABRAS = int((10**2) * (1/P_eb_t)) 
+        PALABRAS = int((100) * (1/P_eb_t)) 
         PALABRAS = PALABRAS if (PALABRAS > 1000000) else 1000000
         
         # Arrays para almacenar resultados de cada iteración
@@ -97,9 +97,9 @@ def main():
     print(f"n: {n}, k: {k}, tc: {tc}, dmin: {dmin}, Ga: {Ga:.2f} dB")
     
     if MODO == 0:  # DETECTOR
-        graficos_detector(EbN0_c, P_ep, n, k, tc, dmin - 1)
+        graficos_detector(EbN0_c, P_ep, n, k, td=dmin - 1)
     else:  # CORRECTOR
-        graficos_corrector(EbN0_c, P_eb, Gc, Ga, n, k, td=dmin - 1)
+        graficos_corrector(EbN0_c, P_eb, Gc, Ga, n, k, tc)
     
     # Guardar resultados
     df = simulation_table(EbN0_c, P_ep, P_eb, Gc, Ga)

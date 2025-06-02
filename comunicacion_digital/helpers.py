@@ -29,15 +29,18 @@ def graficos_corrector(Ebn_c, P_eb, Gc, Ga, n, k, tc):
     - Curvas de tasa de error de bit y teórica
     - Ganancia asintótica y ganancia real
     """
-    Ebn_c = np.asarray(Ebn_c) # Eb/n0 de fuente (simulacion) [dB]
-    P_eb = np.asarray(P_eb) # Pebf de fuente (simulacion)
-    Gc = np.asarray(Gc) # Ganancia del codigo
-    Ebn_c_veces = 10**(Ebn_c/10) # Eb/n0 de fuente [veces]
-    Q_teorica = Q(np.sqrt(2 * Ebn_c_veces)) # Q teorica
-    p_canal = Q(np.sqrt(2 * Ebn_c_veces * (k/n))) # Pebf del canal
-    P_eb_teorica = ((2 * tc + 1)/n) * (comb(n, tc + 1)) * (p_canal ** (tc + 1))
-    fig, axs = plt.subplots(1, 2, figsize=(14, 6))
+    Ebn_c = np.asarray(Ebn_c)         # Eb/N0 [dB]
+    P_eb = np.asarray(P_eb)           # Tasa de error de bit
+    Gc = np.asarray(Gc)               # Ganancia del codigo
     
+    
+    Ebn_c_veces = 10**(Ebn_c/10)      # Eb/N0 [veces]
+    Q_teorica = Q(np.sqrt(2 * Ebn_c_veces)) # Q teorica
+    p_canal = Q(np.sqrt(2 * Ebn_c_veces * (k/n))) # Tasa de error de bit del canal
+    P_eb_teorica = ((2 * tc + 1)/n) * comb(n, tc + 1) * (p_canal ** (tc + 1)) # Tasa de error de bit teorica
+
+    # Create figure with two subplots
+    fig, axs = plt.subplots(1, 2, figsize=(14, 6))    
     # Gráfico de tasa de error de bit
     axs[0].semilogy(Ebn_c, P_eb, 'o-', label=r'$P_{eb}$ (codificada - simulacion)')
     axs[0].semilogy(Ebn_c, P_eb_teorica, '--', label=r'$P_{eb}$ (codificada - teórica)')
@@ -65,17 +68,17 @@ def graficos_corrector(Ebn_c, P_eb, Gc, Ga, n, k, tc):
     plt.savefig(os.path.join(graficos_dir, 'CORRECTOR.png'))
     plt.show()
 
-def graficos_detector(Ebn_c, P_ep, n, k, td, dmin):
+def graficos_detector(Ebn_c, P_ep, n, k, td):
     """
     Genera gráficos para el modo DETECTOR:
     - Curvas de tasa de error de palabra y teórica
     Todos los argumentos deben ser np.arrays.
     """
-    Ebn_c = np.asarray(Ebn_c) # Eb/n0 [dB]
+    Ebn_c = np.asarray(Ebn_c) # Eb/n0 del canal [dB]
     P_ep = np.asarray(P_ep) # Tasa de error de palabra
-    Ebn_c_veces = 10**(Ebn_c/10) * (k/n) # Eb/n0 (canal) [veces]
+    Ebn_c_veces = 10**(Ebn_c/10) # Eb/n0 (canal) [veces]
     Q_teorica = Q(np.sqrt(2 * Ebn_c_veces)) # Q teorica
-    P_ep_teorica = (comb(n, td + 1)) * (Q_teorica ** (td + 1))
+    P_ep_teorica = (comb(n, td + 1)) * (Q_teorica ** (td + 1)) # Tasa de error de palabra teorica
     
     fig, ax = plt.subplots(figsize=(10, 6))
     
